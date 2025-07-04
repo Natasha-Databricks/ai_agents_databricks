@@ -1,0 +1,46 @@
+# The main job for agents_workshop.
+resources:
+  jobs:
+    agents_workshop:
+      name: agents_workshop
+
+      trigger:
+        # Run this job every day, exactly one day from the last run; see https://docs.databricks.com/api/workspace/jobs/create#trigger
+        periodic:
+          interval: 1
+          unit: DAYS
+
+      tasks:
+        - task_key: generate_agent_config
+          # job_cluster_key: job_cluster
+          notebook_task:
+            notebook_path: ../notebooks/00_generate_agent_config.py
+            base_parameters:
+              output_path: "../config/agent_config.yaml"  # Updated parameter
+
+        - task_key: author_agent
+          # job_cluster_key: job_cluster
+          notebook_task:
+            notebook_path: ../notebooks/01_author_multi_agent.py
+            base_parameters:
+              config_yml: "../config/agent_config.yaml"  # Updated parameter
+          depends_on:
+            - task_key: generate_agent_config
+        
+        # - task_key: optimise_agent
+        #   # job_cluster_key: job_cluster
+        #   notebook_task:
+        #     notebook_path: ../notebooks/02_mlflow_dspy_prompt_optimization.py
+        #   depends_on:
+        #     - task_key: author_agent
+
+
+      # job_clusters:
+      #   - job_cluster_key: job_cluster
+      #     new_cluster:
+      #       spark_version: 15.4.x-scala2.12
+      #       node_type_id: i3.xlarge
+      #       data_security_mode: SINGLE_USER
+      #       autoscale:
+      #           min_workers: 1
+      #           max_workers: 4

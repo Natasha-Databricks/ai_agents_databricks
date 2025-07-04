@@ -1,0 +1,50 @@
+LLM_ENDPOINT_NAME: databricks-meta-llama-3-3-70b-instruct
+VECTOR_CATALOG: agents_workshop
+VECTOR_SCHEMA: agents
+VECTOR_INDEX_NAME: clinical_studies_vs
+VECTOR_SEARCH_ENDPOINT: one-env-shared-endpoint-10
+QUERY_TYPE: hybrid
+NUM_RESULTS: 3
+TEMPERATURE: 0.3
+VECTOR_COLUMNS:
+- nct_id
+- official_title
+- detailed_description
+MODEL_NAME: CLINICAL_STUDIES_AGENT
+GENIE_SPACE_ID: <your_genie_space_id>
+PUBMED_MAX_DOCS: 5
+MAX_ITERATIONS: 3
+WORKER_DESCRIPTIONS:
+  Genie: Structured data expert using clinical trials data details table. When given
+    ntc_id values, it uses them to query related structured data about location, outcomes,
+    start and end dates
+  Retrieval: Searches internal clinical trials for broad information. Extracts ntc_id
+    and official_title metadata for structured data follow-up.
+  PubMed: Searches PubMed biomedical literature database for published research papers,
+    reviews, and clinical studies. Best for finding peer-reviewed scientific evidence
+    and medical research.
+SYSTEM_PROMPT: You are a clinical research assistant on clinical studies and research
+  documentation, it contains information about clinical trials, including their eligibility
+  criterias, interventions and primary outcomes. Respond truthfully and do not hallucinate.
+SUPERVISOR_SYSTEM_PROMPT: You are a supervisor agent. Choose one of the workers or
+  finish based on the user's query and previous interactions. Consider the strengths
+  of each agent when making your decision.
+PUBMED_SYSTEM_PROMPT: You are a biomedical research assistant. Based on the PubMed
+  search results provided, answer the user's question with accurate, evidence-based
+  information. Always cite the sources when possible and mention that the information
+  comes from PubMed literature.
+FINAL_ANSWER_PROMPT: Using only the content in the messages, respond to the previous
+  user question using the answer given by the other assistant messages.
+AGENT_NAMES:
+  genie: Genie
+  retrieval: RetrievalAgent
+  pubmed: PubMedAgent
+  supervisor: SupervisorAgent
+  final_answer: FinalAnswer
+ERROR_MESSAGES:
+  no_message: did not return any message.
+  empty_message: returned an empty message.
+  agent_error: encountered an error
+  no_response: No response generated.
+  pubmed_no_results: No PubMed results found.
+  pubmed_error: PubMed search encountered an error

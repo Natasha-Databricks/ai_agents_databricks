@@ -1,0 +1,55 @@
+AGENT_NAMES:
+  final_answer: FinalAnswer
+  genie: Genie
+  pubmed: PubMedAgent
+  retrieval: RetrievalAgent
+  supervisor: SupervisorAgent
+ERROR_MESSAGES:
+  agent_error: encountered an error
+  empty_message: returned an empty message.
+  no_message: did not return any message.
+  no_response: No response generated.
+  pubmed_error: PubMed search encountered an error
+  pubmed_no_results: No PubMed results found.
+FINAL_ANSWER_PROMPT: Using only the content in the messages, respond to the previous user question using the answer given by the other assistant messages.
+GENIE_SPACE_ID: <your_genie_space_id>
+LLM_ENDPOINT_NAME: databricks-meta-llama-3-3-70b-instruct
+MAX_ITERATIONS: 3
+MLFLOW_PROMPT_URI: prompts:/agents_workshop.agents.baseline_prompt_user/27
+MODEL_NAME: CLINICAL_STUDIES_AGENT
+NUM_RESULTS: 3
+PUBMED_MAX_DOCS: 5
+PUBMED_SYSTEM_PROMPT: You are a biomedical research assistant. Based on the PubMed search results provided, answer the user's question with accurate, evidence-based information. Always cite the sources when possible and mention that the information comes from PubMed literature.
+QUERY_TYPE: hybrid
+SUPERVISOR_SYSTEM_PROMPT: You are a supervisor agent. Choose one of the workers or finish based on the user's query and previous interactions. Consider the strengths of each agent when making your decision.
+SYSTEM_PROMPT: !!python/object:mlflow.entities.model_registry.prompt_version.PromptVersion
+  _aliases: []
+  _creation_time: !!python/object/apply:google.protobuf.timestamp_pb2.Timestamp
+    state:
+      serialized: !!binary |
+        CJW1j8MGEMCzhOwB
+  _description: ''
+  _last_updated_timestamp: null
+  _name: agents_workshop.agents.baseline_prompt_user
+  _tags:
+    mlflow.prompt.is_prompt: 'true'
+    mlflow.prompt.text: '"<system>\nYour input fields are:\n1. `question` (str):\nYour output fields are:\n1. `answer` (str):\nAll interactions will be structured in the following way, with the appropriate values filled in.\n\nInputs will have the following structure:\n\n[[ ## question ## ]]\n{question}\n\nOutputs will be a JSON object with the following fields.\n\n{\n  \"answer\": \"{answer}\"\n}\nIn adhering to this structure, your objective is: \n        You are a medical researcher working on a critical project to develop a new treatment for a rare disease. Your team is relying on you to find accurate information about ongoing clinical trials to inform your research. Given a prompt about clinical trials, extract the question and provide a truthful response in JSON format, without hallucinating, based on the information about clinical trials, including eligibility criteria, interventions, and primary outcomes. The accuracy of your response is crucial for the success of the project and
+      the potential to save countless lives. Please respond with the most accurate information available.\n</system>\n\n<user>\n[[ ## question ## ]]\n{{question}}\n\nRespond with a JSON object in the following order of fields: `answer`.\n</user>"'
+    overall_eval_score: '18.02'
+  _user_id: null
+  _variables: !!set
+    question: null
+  _version: '27'
+TEMPERATURE: 0.3
+VECTOR_CATALOG: agents_workshop
+VECTOR_COLUMNS:
+- nct_id
+- official_title
+- detailed_description
+VECTOR_INDEX_NAME: clinical_studies_vs
+VECTOR_SCHEMA: agents
+VECTOR_SEARCH_ENDPOINT: one-env-shared-endpoint-10
+WORKER_DESCRIPTIONS:
+  Genie: Structured data expert using clinical trials data details table. When given ntc_id values, it uses them to query related structured data about location, outcomes, start and end dates
+  PubMed: Searches PubMed biomedical literature database for published research papers, reviews, and clinical studies. Best for finding peer-reviewed scientific evidence and medical research.
+  Retrieval: Searches internal clinical trials for broad information. Extracts ntc_id and official_title metadata for structured data follow-up.
