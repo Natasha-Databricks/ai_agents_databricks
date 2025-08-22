@@ -14,14 +14,14 @@ resources:
         - task_key: generate_agent_config
           # job_cluster_key: job_cluster
           notebook_task:
-            notebook_path: ../notebooks/00_generate_agent_config.py
+            notebook_path: ../entrypoints/00_generate_agent_config.py
             base_parameters:
               output_path: "../config/agent_config.yaml"  # Updated parameter
 
         - task_key: author_agent
           # job_cluster_key: job_cluster
           notebook_task:
-            notebook_path: ../notebooks/01_author_multi_agent.py
+            notebook_path: ../entrypoints/01_author_multi_agent.py
             base_parameters:
               config_yml: "../config/agent_config.yaml"  # Updated parameter
           depends_on:
