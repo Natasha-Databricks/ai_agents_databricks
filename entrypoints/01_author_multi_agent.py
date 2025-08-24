@@ -79,22 +79,22 @@ print(f"Config file: {config_file}")
 print(f"User Name: {user_name}")
 
 
-# Set Secrets
-secret_scope_name = "your_secret_scope"
-secret_key_name_pat = "PAT_token"
-secret_key_name_host = "Genie_host"
+# # Set Secrets
+# secret_scope_name = "your_secret_scope"
+# secret_key_name_pat = "PAT_token"
+# secret_key_name_host = "Genie_host"
 
-os.environ["DATABRICKS_GENIE_PAT"] = dbutils.secrets.get(
-    scope=secret_scope_name, key=secret_key_name_pat
-)
+# os.environ["DATABRICKS_GENIE_PAT"] = dbutils.secrets.get(
+#     scope=secret_scope_name, key=secret_key_name_pat
+# )
 
-os.environ["DB_MODEL_SERVING_HOST_URL"] = dbutils.secrets.get(
-    scope=secret_scope_name, key=secret_key_name_host
-)
+# os.environ["DB_MODEL_SERVING_HOST_URL"] = dbutils.secrets.get(
+#     scope=secret_scope_name, key=secret_key_name_host
+# )
 
-assert os.environ["DATABRICKS_GENIE_PAT"] is not None, (
-    "The DATABRICKS_GENIE_PAT was not properly set to the PAT secret"
-)
+# assert os.environ["DATABRICKS_GENIE_PAT"] is not None, (
+#     "The DATABRICKS_GENIE_PAT was not properly set to the PAT secret"
+# )
 
 # COMMAND ----------
 
@@ -107,29 +107,6 @@ for key, value in config.items():
         print(f"{key}: [System prompt configured]")
     else:
         print(f"{key}: {value}")
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## 2.5. Setup Config File Path for Agent Import
-# MAGIC
-# MAGIC Ensure the agent module can find the configuration file by copying it to a known location.
-
-# COMMAND ----------
-
-import shutil
-import os
-
-# Copy config file to current directory for reliable access
-current_dir = os.getcwd()
-config_target = os.path.join(current_dir, "agent_config.yaml")
-
-try:
-    shutil.copy2(config_file, config_target)
-    print(f"Config file copied to: {config_target}")
-except Exception as e:
-    print(f"Warning: Could not copy config file: {e}")
-    print(f"Agent will try to load from original path: {config_file}")
 
 # COMMAND ----------
 
@@ -168,14 +145,9 @@ from agent_modules.agent import AGENT
 
 # COMMAND ----------
 
-test_question = "Find recent publications on rare diseases "
-example_input = {"messages": [{"role": "user", "content": test_question}]}
-AGENT.predict(example_input)
-
-# COMMAND ----------
-
+#test_question = "Find recent publications on rare diseases "
 test_question = "Any internal clinical trials on rare diseases? What were the outcomes of those using the structured database"
-example_input = {"messages": [{"role": "user", "content": test_question}]}
+example_input = {"input": [{"role": "user", "content": test_question}]}
 AGENT.predict(example_input)
 
 # COMMAND ----------
@@ -192,32 +164,44 @@ AGENT.predict(example_input)
 
 # COMMAND ----------
 
-from mlflow.genai.scorers import RelevanceToQuery, Safety
+import json
+import pandas as pd
+import mlflow
+from mlflow.genai.scorers import Correctness
 
+# Load evaluation data
 with open("../data/eval_dataset.json", "r") as file:
     eval_data = json.load(file)
 
-eval_dataset = pd.DataFrame([
+# Create dataset in MLflow's expected format
+eval_dataset = [
     {
-        "inputs": {
-            "inputs": {"messages": [{"role": "user", "content": item["question"]}]}
-        },
-        "expected_response": item["answer"]
+        "inputs": {"input": [{"role": "user", "content": item["question"]}]},
+        "expectations": {"expected_facts": [item["answer"]]}
     }
     for item in eval_data
-])
+]
 
-# COMMAND ----------
+def predict_fn(input):  # Parameter name must match the key in "inputs"
+    """Simple prediction function for standardized ResponsesAgent."""
+    # The input parameter will be the list of messages
+    response = AGENT.predict({"input": input})
+    
+    # Find the final text output (should be last item with type "text") 
+    for item in reversed(response.output):
+        if isinstance(item, dict) and item.get("type") == "text":
+            return item.get("text", "")
+    
+    return "No response generated"
 
-def predict_fn(inputs):
-    return AGENT.predict(inputs)
-
+# Run evaluation
 eval_results = mlflow.genai.evaluate(
     data=eval_dataset,
     predict_fn=predict_fn,
-    scorers=[RelevanceToQuery(), Safety()],
+    scorers=[Correctness()]
 )
 
+print(f"Evaluation completed: {eval_results}")
 
 # COMMAND ----------
 
@@ -226,6 +210,17 @@ eval_results = mlflow.genai.evaluate(
 # MAGIC For the most common Databricks resource types, Databricks supports and recommends declaring resource dependencies for the agent upfront during logging. This enables automatic authentication passthrough when you deploy the agent. With automatic authentication passthrough, Databricks automatically provisions, rotates, and manages short-lived credentials to securely access these resource dependencies from within the agent endpoint.
 # MAGIC
 # MAGIC To enable automatic authentication, specify the dependent Databricks resources when calling `mlflow.pyfunc.log_model()`.
+
+# COMMAND ----------
+
+example_input = {
+  "input": [
+    {
+      "role": "user",
+      "content": "Find recent publications on rare diseases and their treatment options"
+    }
+  ]
+}
 
 # COMMAND ----------
 
@@ -349,11 +344,11 @@ print(f"Model {UC_MODEL_NAME} version {uc_registered_model_info.version} registe
 #            "enable_safety_filter": True,
 #         }},
 #     tags={"endpointSource": "agent_chatbot"},
-#     environment_vars={
-#         "DATABRICKS_GENIE_PAT": f"{{{{secrets/{secret_scope_name}/{secret_key_name_pat}}}}}",
-#         "DB_MODEL_SERVING_HOST_URL": f"{{{{secrets/{secret_scope_name}/{secret_key_name_host}}}}}",
+#     # environment_vars={
+#     #     "DATABRICKS_GENIE_PAT": f"{{{{secrets/{secret_scope_name}/{secret_key_name_pat}}}}}",
+#     #     "DB_MODEL_SERVING_HOST_URL": f"{{{{secrets/{secret_scope_name}/{secret_key_name_host}}}}}",
 
-#     },
+#     # },
 # )
 
 # print(f"Agent deployed: {deployment}")

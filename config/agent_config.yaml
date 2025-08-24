@@ -1,4 +1,4 @@
-LLM_ENDPOINT_NAME: databricks-meta-llama-3-3-70b-instruct
+LLM_ENDPOINT_NAME: databricks-llama-4-maverick
 VECTOR_CATALOG: agents_workshop
 VECTOR_SCHEMA: agents
 VECTOR_INDEX_NAME: clinical_studies_vs
@@ -11,9 +11,12 @@ VECTOR_COLUMNS:
 - official_title
 - detailed_description
 MODEL_NAME: CLINICAL_STUDIES_AGENT
-GENIE_SPACE_ID: <your_genie_space_id>
+GENIE_SPACE_ID: <enter Genie space ID>
 PUBMED_MAX_DOCS: 5
 MAX_ITERATIONS: 3
+SUPERVISOR_TEMPERATURE: 0.1
+SUPERVISOR_MAX_TOKENS: 100
+DEBUG_MODE: true
 WORKER_DESCRIPTIONS:
   Genie: Structured data expert using clinical trials data details table. When given
     ntc_id values, it uses them to query related structured data about location, outcomes,

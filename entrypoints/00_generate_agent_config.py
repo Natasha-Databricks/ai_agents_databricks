@@ -47,7 +47,7 @@ config = {
     # Agent Configuration
     
     # LLM Model Endpoint Configuration
-    "LLM_ENDPOINT_NAME": "databricks-meta-llama-3-3-70b-instruct",
+    "LLM_ENDPOINT_NAME": "databricks-llama-4-maverick", #"databricks-meta-llama-3-3-70b-instruct",
     
     # Vector Search Configuration
     "VECTOR_CATALOG": catalog,
@@ -66,13 +66,16 @@ config = {
     "MODEL_NAME": "CLINICAL_STUDIES_AGENT",
     
     # Genie Configuration
-    "GENIE_SPACE_ID": "<your_genie_space_id>",
+    "GENIE_SPACE_ID": "<enter Genie space ID>",
 
     # PubMed Configuration
     "PUBMED_MAX_DOCS": 5,
     
     # Supervisor Configuration
     "MAX_ITERATIONS": 3,
+    "SUPERVISOR_TEMPERATURE": 0.1,
+    "SUPERVISOR_MAX_TOKENS": 100,
+    "DEBUG_MODE": True,
     
     # Worker Agent Descriptions
     "WORKER_DESCRIPTIONS": {
